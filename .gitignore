@@ -1,0 +1,21 @@
+main.pdf
+Nord.tmTheme
+code_template.typ
+jolt-docs/public
+jolt-docs/CLAUDE.md
+jolt-docs/content/jolt-walkthrough/memory_constraints
+jolt-docs/content/jolt-walkthrough/bytecode-read-raf-sumcheck.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+site/.DS_Store
+.DS_Store

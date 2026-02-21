@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 6 — Booleanity, Bytecode &amp; Virtualization</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ],
+      throwOnError: false
+    });"></script>
+  <style>
+:root {
+  --bg: #0d1117;
+  --card-bg: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --orange: #d29922;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+nav a:hover, nav a.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+.sumcheck-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.sumcheck-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+.metadata {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.meta-item {
+  font-size: 0.9rem;
+}
+.meta-label {
+  color: var(--text-muted);
+  margin-right: 0.3rem;
+}
+.meta-label::after { content: ":"; }
+.sum-over {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(88, 166, 255, 0.05);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+.spec-section { margin-top: 1rem; }
+.spec-section h4 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.math-block {
+  overflow-x: auto;
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.table-wrap { overflow-x: auto; }
+.constraint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.constraint-table th, .constraint-table td {
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+.constraint-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.constraint-table .idx { text-align: right; color: var(--text-muted); }
+.constraint-table .label { font-family: monospace; font-size: 0.8rem; }
+.constraint-table .math-cell { font-size: 0.85rem; }
+.openings { list-style: none; padding-left: 0; }
+.openings li {
+  padding: 0.2rem 0;
+  font-size: 0.9rem;
+}
+.openings li::before {
+  content: "\2192 ";
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="stage1.html">Stage 1</a>
+    <a href="stage2.html">Stage 2</a>
+    <a href="stage3.html">Stage 3</a>
+    <a href="stage4.html">Stage 4</a>
+    <a href="stage5.html">Stage 5</a>
+    <a href="stage6.html" class="active">Stage 6</a>
+    <a href="stage7.html">Stage 7</a>
+    <a href="openings.html">Openings</a>
+    <a href="polynomials.html">Polynomials</a>
+  </nav>
+  <h1>Stage 6 — Booleanity, Bytecode &amp; Virtualization</h1>
+  
+    <section class="sumcheck-card" id="RamHammingBooleanity">
+      <h3>RamHammingBooleanity</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> 3</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{\text{cycle}}^{(6)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$0$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\widetilde{\text{eq}}(r_{\text{cycle}}^{(1)}, X_t) \cdot \left(\textcolor{BurntOrange}{\textsf{RamHammingWeight}}(X_t)^{2} - \textcolor{BurntOrange}{\textsf{RamHammingWeight}}(X_t)\right)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textcolor{BurntOrange}{\textsf{RamHammingWeight}}(r_{\text{cycle}}^{(6)})$</li></ul>
+    </div>
+    </section>
+
+    <section class="sumcheck-card" id="IncClaimReduction">
+      <h3>IncClaimReduction</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> 2</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{\text{cycle}}^{(6)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$\textcolor{ForestGreen}{\textsf{RamInc}}(r_{\text{cycle}}^{(2)}) + \gamma \cdot \textcolor{ForestGreen}{\textsf{RamInc}}(r_{\text{cycle}}^{(4)}) + \gamma^{2} \cdot \textcolor{ForestGreen}{\textsf{RdInc}}(r_{\text{cycle}}^{(4)}) + \gamma^{3} \cdot \textcolor{ForestGreen}{\textsf{RdInc}}(r_{\text{cycle}}^{(5)})$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\textcolor{ForestGreen}{\textsf{RamInc}}(X_t) \cdot \left(\widetilde{\text{eq}}(r_{\text{cycle}}^{(2)}, X_t) + \gamma \cdot \widetilde{\text{eq}}(r_{\text{cycle}}^{(4)}, X_t)\right) + \gamma^{2} \cdot \textcolor{ForestGreen}{\textsf{RdInc}}(X_t) \cdot \left(\widetilde{\text{eq}}(r_{\text{cycle}}^{(4)}, X_t) + \gamma \cdot \widetilde{\text{eq}}(r_{\text{cycle}}^{(5)}, X_t)\right)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textcolor{ForestGreen}{\textsf{RamInc}}(r_{\text{cycle}}^{(6)})$</li>
+<li>$\textcolor{ForestGreen}{\textsf{RdInc}}(r_{\text{cycle}}^{(6)})$</li></ul>
+    </div>
+    </section>
+
+    <section class="sumcheck-card" id="BytecodeReadRaf">
+      <h3>BytecodeReadRaf</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> d_bc + 1</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 K_{\text{bc}} + \log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_k \in \{0,1\}^{\log_2 K_{\text{bc}}}, X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{K_{\text{bc}}}^{(6)}, r_{\text{cycle}}^{(6)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$\textcolor{BurntOrange}{\textsf{UnexpandedPC}}(r_{\text{cycle}}^{(1)}) + \gamma_1 \cdot \textcolor{BurntOrange}{\textsf{Imm}}(r_{\text{cycle}}^{(1)}) + \sum_{i=0}^{N_cflags-1} \gamma_1^{2+i} \cdot \textcolor{BurntOrange}{\textsf{OpFlags}(\text{cf}_{i})}(r_{\text{cycle}}^{(1)}) + \gamma \cdot \left(\textcolor{BurntOrange}{\textsf{OpFlags}(\text{Jump})}(r_{\text{cycle}}^{(2)}) + \gamma_2 \cdot \textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{Branch})}(r_{\text{cycle}}^{(2)}) + \gamma_2^{2} \cdot \textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{IsRdNotZero})}(r_{\text{cycle}}^{(2)}) + \gamma_2^{3} \cdot \textcolor{BurntOrange}{\textsf{OpFlags}(\text{WriteLookupOutputToRD})}(r_{\text{cycle}}^{(2)}) + \gamma_2^{4} \cdot \textcolor{BurntOrange}{\textsf{OpFlags}(\text{VirtualInstruction})}(r_{\text{cycle}}^{(2)})\right) + \gamma^{2} \cdot \left(\textcolor{BurntOrange}{\textsf{Imm}}(r_{\text{cycle}}^{(3)}) + \gamma_3 \cdot \textcolor{BurntOrange}{\textsf{UnexpandedPC}}(r_{\text{cycle}}^{(3)}) + \gamma_3^{2} \cdot \textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{LeftOperandIsRs1Value})}(r_{\text{cycle}}^{(3)}) + \gamma_3^{3} \cdot \textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{LeftOperandIsPC})}(r_{\text{cycle}}^{(3)}) + \gamma_3^{4} \cdot \textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{RightOperandIsRs2Value})}(r_{\text{cycle}}^{(3)}) + \gamma_3^{5} \cdot \textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{RightOperandIsImm})}(r_{\text{cycle}}^{(3)}) + \gamma_3^{6} \cdot \textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{IsNoop})}(r_{\text{cycle}}^{(3)}) + \gamma_3^{7} \cdot \textcolor{BurntOrange}{\textsf{OpFlags}(\text{VirtualInstruction})}(r_{\text{cycle}}^{(3)}) + \gamma_3^{8} \cdot \textcolor{BurntOrange}{\textsf{OpFlags}(\text{IsFirstInSequence})}(r_{\text{cycle}}^{(3)})\right) + \gamma^{3} \cdot \left(\textcolor{BurntOrange}{\textsf{RdWa}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)}) + \gamma_4 \cdot \textcolor{BurntOrange}{\textsf{Rs1Ra}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)}) + \gamma_4^{2} \cdot \textcolor{BurntOrange}{\textsf{Rs2Ra}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})\right) + \gamma^{4} \cdot \left(\textcolor{BurntOrange}{\textsf{RdWa}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(5)}) + \gamma_5 \cdot \textcolor{BurntOrange}{\textsf{InstructionRafFlag}}(r_{\text{cycle}}^{(5)}) + \sum_{i=0}^{N_tables-1} \gamma_5^{2+i} \cdot \textcolor{BurntOrange}{\textsf{TableFlag}(j)}(r_{\text{cycle}}^{(5)})\right) + \gamma^{5} \cdot \textcolor{BurntOrange}{\textsf{PC}}(r_{\text{cycle}}^{(1)}) + \gamma^{6} \cdot \textcolor{BurntOrange}{\textsf{PC}}(r_{\text{cycle}}^{(3)})$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\prod_{i=0}^{d_bc-1} \textcolor{ForestGreen}{\textsf{BytecodeRa}(i)}(X_k, X_t) \cdot \left(\widetilde{\text{eq}}(r_{\text{cycle}}^{(1)}, X_t) \cdot W_1(X_k) + \gamma \cdot \widetilde{\text{eq}}(r_{\text{cycle}}^{(2)}, X_t) \cdot W_2(X_k) + \gamma^{2} \cdot \widetilde{\text{eq}}(r_{\text{cycle}}^{(3)}, X_t) \cdot W_3(X_k) + \gamma^{3} \cdot \widetilde{\text{eq}}(r_{\text{cycle}}^{(4)}, X_t) \cdot W_4(X_k) + \gamma^{4} \cdot \widetilde{\text{eq}}(r_{\text{cycle}}^{(5)}, X_t) \cdot W_5(X_k)\right)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textcolor{ForestGreen}{\textsf{BytecodeRa}(i)}(r_{K_{\text{bc}}^{(i)}}^{(6)}, r_{\text{cycle}}^{(6)}) \text{ for } i=0,\ldots,d_{\text{bc}}-1$</li></ul>
+    </div>
+    </section>
+
+    <section class="sumcheck-card" id="InstructionRaVirtualization">
+      <h3>InstructionRaVirtualization</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> M + 1</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{\text{cycle}}^{(6)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$\sum_{i=0}^{d_v-1} \gamma^i \cdot \textcolor{BurntOrange}{\textsf{InstructionRa}(i)}(r_{K_{\text{instr}}^{(i)}}^{(5)}, r_{\text{cycle}}^{(5)})$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\widetilde{\text{eq}}(r_{\text{cycle}}^{(5)}, X_t) \cdot \sum_{i=0}^{d_v-1} \gamma^i \cdot \prod_{j=0}^{M-1} \textcolor{ForestGreen}{\textsf{InstructionRa}(\text{iM+j})}(r_{K^{(iM+j)}}^{(5)}, X_t)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textsf{InstructionRa}(j)(r_{K^{(j)}}^{(5)}, r_{\text{cycle}}^{(6)}) \text{ for } j=0,\ldots,d_{\text{instr}}-1$</li></ul>
+    </div>
+    </section>
+
+    <section class="sumcheck-card" id="RamRaVirtualization">
+      <h3>RamRaVirtualization</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> d_ram + 1</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{\text{cycle}}^{(6)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$\textcolor{BurntOrange}{\textsf{RamRa}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(5)})$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\widetilde{\text{eq}}(r_{\text{cycle}}^{(5)}, X_t) \cdot \prod_{i=0}^{d_ram-1} \textcolor{ForestGreen}{\textsf{RamRa}(i)}(r_{K_{\text{ram}}^{(i)}}^{(2)}, X_t)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textcolor{ForestGreen}{\textsf{RamRa}(i)}(r_{K_{\text{ram}}^{(i)}}^{(2)}, r_{\text{cycle}}^{(6)}) \text{ for } i=0,\ldots,d_{\text{ram}}-1$</li></ul>
+    </div>
+    </section>
+
+    <section class="sumcheck-card" id="Booleanity">
+      <h3>Booleanity</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> 3</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 N_{\text{instr}} + \log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_k \in \{0,1\}^{\log_2 N_{\text{instr}}}, X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{\text{addr}}^{(6)}, r_{\text{cycle}}^{(6)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$0$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\widetilde{\text{eq}}(r_{\text{addr}}^{(5)}, r_{\text{cycle}}^{(5)}, X_k, X_t) \cdot \sum_{j=0}^{d-1} \gamma^{2j} \cdot \left(\textcolor{ForestGreen}{\textsf{Ra}_{j}}(X_k, X_t)^{2} - \textcolor{ForestGreen}{\textsf{Ra}_{j}}(X_k, X_t)\right)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textsf{Ra}_{j}(r_{\text{addr}}^{(6)}, r_{\text{cycle}}^{(6)}) \text{ for } j=0,\ldots,d-1 (d = d_{\text{instr}} + d_{\text{bc}} + d_{\text{ram}})$</li></ul>
+    </div>
+    </section>
+</body>
+</html>
