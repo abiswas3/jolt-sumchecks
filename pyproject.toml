@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "jolt-sumcheck-specs"
+version = "0.1.0"
+description = "Formal AST-based specifications of all 21 sumchecks in Jolt's proving pipeline"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Ari Biswas" },
+    { name = "Claudio Bravo" },
+]
+
+[tool.setuptools.packages.find]
+include = ["sumcheck*"]

@@ -13,11 +13,18 @@ Source: jolt-docs/content/references/polynomials.md
 from __future__ import annotations
 
 from .defs import (
-    DimDef, PolyKind, PolyDef, ParamDef,
-    DIM_CYCLE, DIM_K_RAM, DIM_K_REG, DIM_ADDR,
-    DIM_K_INSTR, DIM_K_BC, DIM_N_V,
+    DIM_ADDR,
+    DIM_CYCLE,
+    DIM_K_BC,
+    DIM_K_INSTR,
+    DIM_K_RAM,
+    DIM_K_REG,
+    DIM_N_V,
+    DimDef,
+    ParamDef,
+    PolyDef,
+    PolyKind,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════
 # Parameters
@@ -116,7 +123,11 @@ COMMITTED_POLYS: list[PolyDef] = [
         "Registers",
     ),
     PolyDef(
-        "RamInc", _C, [DIM_CYCLE], "ram_write_timestamp[t] - ram_write_timestamp[t-1]", "RAM"
+        "RamInc",
+        _C,
+        [DIM_CYCLE],
+        "ram_write_timestamp[t] - ram_write_timestamp[t-1]",
+        "RAM",
     ),
     PolyDef(
         "InstructionRa(i)",
@@ -162,7 +173,9 @@ COMMITTED_POLYS: list[PolyDef] = [
 
 VIRTUAL_POLYS: list[PolyDef] = [
     # Program counter
-    PolyDef("PC", _V, [DIM_CYCLE], "trace[t].pc (expanded ELF address)", "Program counter"),
+    PolyDef(
+        "PC", _V, [DIM_CYCLE], "trace[t].pc (expanded ELF address)", "Program counter"
+    ),
     PolyDef(
         "UnexpandedPC",
         _V,
@@ -278,13 +291,23 @@ VIRTUAL_POLYS: list[PolyDef] = [
         "Product constraints",
     ),
     # Registers — directly from execution trace
-    PolyDef("Rd", _V, [DIM_CYCLE], "trace[t].rd; destination register index", "Registers"),
+    PolyDef(
+        "Rd", _V, [DIM_CYCLE], "trace[t].rd; destination register index", "Registers"
+    ),
     PolyDef("Imm", _V, [DIM_CYCLE], "trace[t].imm; immediate value", "Registers"),
     PolyDef(
-        "Rs1Value", _V, [DIM_CYCLE], "registers[trace[t].rs1] before cycle t", "Registers"
+        "Rs1Value",
+        _V,
+        [DIM_CYCLE],
+        "registers[trace[t].rs1] before cycle t",
+        "Registers",
     ),
     PolyDef(
-        "Rs2Value", _V, [DIM_CYCLE], "registers[trace[t].rs2] before cycle t", "Registers"
+        "Rs2Value",
+        _V,
+        [DIM_CYCLE],
+        "registers[trace[t].rs2] before cycle t",
+        "Registers",
     ),
     PolyDef(
         "RdWriteValue",
@@ -294,13 +317,25 @@ VIRTUAL_POLYS: list[PolyDef] = [
         "Registers",
     ),
     PolyDef(
-        "Rs1Ra", _V, [DIM_K_REG, DIM_CYCLE], "one-hot: 1 iff k = trace[t].rs1", "Registers"
+        "Rs1Ra",
+        _V,
+        [DIM_K_REG, DIM_CYCLE],
+        "one-hot: 1 iff k = trace[t].rs1",
+        "Registers",
     ),
     PolyDef(
-        "Rs2Ra", _V, [DIM_K_REG, DIM_CYCLE], "one-hot: 1 iff k = trace[t].rs2", "Registers"
+        "Rs2Ra",
+        _V,
+        [DIM_K_REG, DIM_CYCLE],
+        "one-hot: 1 iff k = trace[t].rs2",
+        "Registers",
     ),
     PolyDef(
-        "RdWa", _V, [DIM_K_REG, DIM_CYCLE], "one-hot: 1 iff k = trace[t].rd", "Registers"
+        "RdWa",
+        _V,
+        [DIM_K_REG, DIM_CYCLE],
+        "one-hot: 1 iff k = trace[t].rd",
+        "Registers",
     ),
     PolyDef(
         "RegistersVal",
@@ -324,9 +359,15 @@ VIRTUAL_POLYS: list[PolyDef] = [
         "prod_{i=0}^{d_ram-1} cp:RamRa(i)(k_i, t); product of committed chunks",
         "RAM",
     ),
-    PolyDef("RamReadValue", _V, [DIM_CYCLE], "memory[ram_address] before cycle t", "RAM"),
-    PolyDef("RamWriteValue", _V, [DIM_CYCLE], "memory[ram_address] after cycle t", "RAM"),
-    PolyDef("RamVal", _V, [DIM_K_RAM, DIM_CYCLE], "memory[k] right before cycle t", "RAM"),
+    PolyDef(
+        "RamReadValue", _V, [DIM_CYCLE], "memory[ram_address] before cycle t", "RAM"
+    ),
+    PolyDef(
+        "RamWriteValue", _V, [DIM_CYCLE], "memory[ram_address] after cycle t", "RAM"
+    ),
+    PolyDef(
+        "RamVal", _V, [DIM_K_RAM, DIM_CYCLE], "memory[k] right before cycle t", "RAM"
+    ),
     PolyDef(
         "RamValInit", _V, [DIM_K_RAM], "memory[k] at t=0 (initial memory image)", "RAM"
     ),
@@ -370,9 +411,15 @@ VIRTUAL_POLYS: list[PolyDef] = [
         "Circuit flags",
     ),
     PolyDef(
-        "OpFlags(Store)", _V, [DIM_CYCLE], "1 iff instr(t) is SB/SH/SW/SD", "Circuit flags"
+        "OpFlags(Store)",
+        _V,
+        [DIM_CYCLE],
+        "1 iff instr(t) is SB/SH/SW/SD",
+        "Circuit flags",
     ),
-    PolyDef("OpFlags(Jump)", _V, [DIM_CYCLE], "1 iff instr(t) is JAL/JALR", "Circuit flags"),
+    PolyDef(
+        "OpFlags(Jump)", _V, [DIM_CYCLE], "1 iff instr(t) is JAL/JALR", "Circuit flags"
+    ),
     PolyDef(
         "OpFlags(WriteLookupOutputToRD)",
         _V,
@@ -580,6 +627,7 @@ ALL_POLYS: list[PolyDef] = COMMITTED_POLYS + VIRTUAL_POLYS + VERIFIER_POLYS
 # Callable PolyDef lookup
 # ═══════════════════════════════════════════════════════════════════
 
+
 class _PolyNamespace:
     """Attribute access to PolyDefs by name.
 
@@ -587,6 +635,7 @@ class _PolyNamespace:
         OpFlags(Load)     → ns.OpFlags_Load
         InstructionRa(i)  → ns.InstructionRa_i
     """
+
     def __init__(self, polys: list[PolyDef]):
         self._by_name: dict[str, PolyDef] = {}
         for p in polys:
@@ -604,8 +653,8 @@ class _PolyNamespace:
 
 
 committed = _PolyNamespace(COMMITTED_POLYS)
-virtual   = _PolyNamespace(VIRTUAL_POLYS)
-verifier  = _PolyNamespace(VERIFIER_POLYS)
+virtual = _PolyNamespace(VIRTUAL_POLYS)
+verifier = _PolyNamespace(VERIFIER_POLYS)
 
 
 def poly(name: str) -> PolyDef:

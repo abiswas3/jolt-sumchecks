@@ -445,3 +445,172 @@ def print_resolution() -> None:
     if all_errors:
         print(f"\n  {_RED}{len(all_errors)} issues found{_RST}")
     print()
+
+
+# ═══════════════════════════════════════════════════════════════════
+# Data export — JSON-serialisable claim-flow graph for the web DAG
+# ═══════════════════════════════════════════════════════════════════
+
+def resolution_data() -> dict:
+    """Return the claim-flow graph as a JSON-serialisable dict.
+
+    Returns:
+        {
+          "nodes": [{"id", "label", "stage", "stage_title", "is_pcs"}],
+          "edges": [{"id", "source", "target", "poly_names", "kind"}],
+          "unresolved": [{"source_id", "poly_name", "kind"}],
+        }
+
+    Nodes are individual sumcheck specs plus a synthetic "PCS" sink node
+    that committed-poly claims flow into (they are verified by the PCS,
+    not by a later sumcheck).
+    """
+    from .examples import (
+        stage1_spartan_outer,
+        stage2_product_virtualization,
+        stage2_ram_read_write,
+        stage2_instruction_claim_reduction,
+        stage2_ram_raf_evaluation,
+        stage2_ram_output_check,
+        stage3_shift,
+        stage3_instruction_input,
+        stage3_registers_claim_reduction,
+        stage4_registers_read_write,
+        stage4_ram_val_check,
+        stage5_instruction_read_raf,
+        stage5_ram_ra_claim_reduction,
+        stage5_registers_val_evaluation,
+        stage6_ram_hamming_booleanity,
+        stage6_inc_claim_reduction,
+        stage6_bytecode_read_raf,
+        stage6_instruction_ra_virtualization,
+        stage6_ram_ra_virtualization,
+        stage6_booleanity,
+        stage7_hamming_weight_claim_reduction,
+    )
+
+    stages_list: list[tuple[int, str, list]] = [
+        (1, "Spartan", [stage1_spartan_outer()]),
+        (2, "Virtualization & RAM", [
+            stage2_product_virtualization(),
+            stage2_ram_read_write(),
+            stage2_instruction_claim_reduction(),
+            stage2_ram_raf_evaluation(),
+            stage2_ram_output_check(),
+        ]),
+        (3, "Shift & Instruction Input", [
+            stage3_shift(),
+            stage3_instruction_input(),
+            stage3_registers_claim_reduction(),
+        ]),
+        (4, "Registers & RAM Val", [
+            stage4_registers_read_write(),
+            stage4_ram_val_check(),
+        ]),
+        (5, "Instruction Read RAF & Reductions", [
+            stage5_instruction_read_raf(),
+            stage5_ram_ra_claim_reduction(),
+            stage5_registers_val_evaluation(),
+        ]),
+        (6, "Booleanity, Bytecode & Virtualization", [
+            stage6_ram_hamming_booleanity(),
+            stage6_inc_claim_reduction(),
+            stage6_bytecode_read_raf(),
+            stage6_instruction_ra_virtualization(),
+            stage6_ram_ra_virtualization(),
+            stage6_booleanity(),
+        ]),
+        (7, "Hamming Weight Claim Reduction", [
+            stage7_hamming_weight_claim_reduction(),
+        ]),
+    ]
+
+    PCS_ID = "PCS"
+    nodes: list[dict] = [
+        {"id": PCS_ID, "label": "PCS", "stage": 0,
+         "stage_title": "PCS Verification", "is_pcs": True},
+    ]
+
+    # (source_id, target_id, kind) → [poly_name, ...]
+    edge_map: dict[tuple[str, str, str], list[str]] = {}
+
+    # claim_key → {node_id, kind, name}
+    outstanding: dict[str, dict] = {}
+
+    def _add_edge(source: str, target: str, poly_name: str, kind: str) -> None:
+        k = (source, target, kind)
+        if k not in edge_map:
+            edge_map[k] = []
+        clean = poly_name.split(" for ")[0].strip()
+        if clean not in edge_map[k]:
+            edge_map[k].append(clean)
+
+    for stage_num, stage_title, specs in stages_list:
+        for spec in specs:
+            node_id = f"S{stage_num}_{spec.name}"
+            nodes.append({
+                "id": node_id,
+                "label": spec.name,
+                "stage": stage_num,
+                "stage_title": stage_title,
+                "is_pcs": False,
+            })
+
+            rhs = _rhs_polys(spec)
+            opened = _opened_claims(spec)
+
+            # Consume prior outstanding claims
+            for kind, pname, args in rhs:
+                if kind == "verifier":
+                    continue
+                key = _claim_key(pname, args)
+                if key in outstanding:
+                    src = outstanding.pop(key)
+                    _add_edge(src["node_id"], node_id, pname, src["kind"])
+                else:
+                    # Parametric matching
+                    base_name = pname.split(" for ")[0].strip()
+                    param = _is_parametric(base_name)
+                    if param:
+                        base, _ = param
+                        point_parts = [_fmt_arg(a) for a in args if isinstance(a, Opening)]
+                        point_suffix = "@(" + ", ".join(point_parts) + ")"
+                        matches = [
+                            okey for okey in list(outstanding.keys())
+                            if okey.endswith(point_suffix)
+                            and okey[:-len(point_suffix)].startswith(base + "(")
+                            and okey[:-len(point_suffix)].endswith(")")
+                        ]
+                        for okey in sorted(matches):
+                            src = outstanding.pop(okey)
+                            _add_edge(src["node_id"], node_id, src["name"], src["kind"])
+
+            # Produce new claims
+            for kind, oname, oargs in opened:
+                key = _claim_key(oname, oargs)
+                outstanding[key] = {"node_id": node_id, "kind": kind, "name": oname}
+
+    # Remaining outstanding claims
+    unresolved: list[dict] = []
+    for _key, src in outstanding.items():
+        if src["kind"] == "cp":
+            _add_edge(src["node_id"], PCS_ID, src["name"], "cp")
+        else:
+            unresolved.append({
+                "source_id": src["node_id"],
+                "poly_name": src["name"].split(" for ")[0].strip(),
+                "kind": src["kind"],
+            })
+
+    edges = [
+        {
+            "id": f"e{i}",
+            "source": source,
+            "target": target,
+            "poly_names": names,
+            "kind": kind,
+        }
+        for i, ((source, target, kind), names) in enumerate(edge_map.items())
+    ]
+
+    return {"nodes": nodes, "edges": edges, "unresolved": unresolved}

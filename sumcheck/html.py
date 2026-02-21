@@ -4,9 +4,9 @@ HTML site generator for sumcheck specifications.
 Generates one page per stage with KaTeX-rendered math expressions.
 
 Usage:
-    python3 -m sumcheck html                # all stages → site/stages/
+    python3 -m sumcheck html                # all stages → docs/
     python3 -m sumcheck html --stage 5      # just stage 5
-    python3 -m sumcheck html --out ./docs   # custom output dir
+    python3 -m sumcheck html --out ./out    # custom output dir
 """
 
 from __future__ import annotations
@@ -366,7 +366,7 @@ def _page(title: str, body: str, active_page: str, total_stages: int = 7) -> str
     for s in range(1, total_stages + 1):
         cls = ' class="active"' if active_page == f"stage{s}" else ""
         nav_links.append(f'<a href="stage{s}.html"{cls}>Stage {s}</a>')
-    for page, label in [("openings", "Openings"), ("polynomials", "Polynomials")]:
+    for page, label in [("openings", "Openings"), ("polynomials", "Polynomials"), ("resolve", "Resolve")]:
         cls = ' class="active"' if active_page == page else ""
         nav_links.append(f'<a href="{page}.html"{cls}>{label}</a>')
     nav = "\n    ".join(nav_links)
@@ -625,10 +625,337 @@ def _polynomials_page() -> str:
 
 
 # ═══════════════════════════════════════════════════════════════════
+# Resolve DAG page — interactive claim-flow graph
+# ═══════════════════════════════════════════════════════════════════
+
+def _resolve_page() -> str:
+    """Generate the interactive claim-flow DAG page using Cytoscape.js."""
+    import json
+    from .resolve import resolution_data
+
+    data = resolution_data()
+    data_json = json.dumps(data, indent=None)
+
+    _STAGE_COLORS = {
+        0: "#3fb950",  # PCS — green
+        1: "#1f6feb",  # Stage 1 — blue
+        2: "#8957e5",  # Stage 2 — purple
+        3: "#d29922",  # Stage 3 — amber
+        4: "#f0883e",  # Stage 4 — orange
+        5: "#56d364",  # Stage 5 — light green
+        6: "#79c0ff",  # Stage 6 — sky blue
+        7: "#ff7b72",  # Stage 7 — salmon
+    }
+    stage_colors_js = json.dumps(_STAGE_COLORS)
+
+    unresolved_note = ""
+    if data["unresolved"]:
+        n = len(data["unresolved"])
+        unresolved_note = (
+            f'<span style="color:#f85149;margin-left:1rem">'
+            f'⚠ {n} unresolved virtual claim{"s" if n != 1 else ""}</span>'
+        )
+
+    extra_css = """
+    .resolve-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      padding: 0.6rem 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; color: var(--text-muted); }
+    .legend-dot { width: 14px; height: 4px; border-radius: 2px; display: inline-block; }
+    .btn-ctrl {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.25rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .btn-ctrl:hover { border-color: var(--accent); color: var(--accent); }
+    .resolve-wrap { display: flex; gap: 1rem; height: 700px; }
+    #cy {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card-bg);
+    }
+    #info-panel {
+      width: 270px;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card-bg);
+      padding: 1rem;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+    #info-panel h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 1rem; }
+    #info-panel .hint { color: var(--text-muted); font-size: 0.8rem; }
+    .info-section { margin-top: 0.85rem; }
+    .info-label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+    }
+    .info-poly {
+      font-family: monospace;
+      font-size: 0.78rem;
+      padding: 0.1rem 0;
+      word-break: break-all;
+    }
+    .info-poly.vp { color: #d29922; }
+    .info-poly.cp { color: #3fb950; }
+    .stage-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    """
+
+    body = f"""
+  <div class="resolve-bar">
+    <button class="btn-ctrl" id="btn-fit">Fit all</button>
+    <button class="btn-ctrl" id="btn-reset">Reset</button>
+    <span class="legend-item">
+      <span class="legend-dot" style="background:#d29922"></span> virtual poly claim
+    </span>
+    <span class="legend-item">
+      <span class="legend-dot" style="background:#3fb950"></span> committed → PCS
+    </span>
+    {unresolved_note}
+  </div>
+  <div class="resolve-wrap">
+    <div id="cy"></div>
+    <div id="info-panel">
+      <h3>Claim Flow DAG</h3>
+      <p class="hint">Click a node or edge to explore claim flows between sumchecks.</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+  <script>
+    const RESOLVE_DATA = {data_json};
+    const STAGE_COLORS = {stage_colors_js};
+    const STAGE_LABELS = {{
+      0: 'PCS', 1: 'Stage 1', 2: 'Stage 2', 3: 'Stage 3',
+      4: 'Stage 4', 5: 'Stage 5', 6: 'Stage 6', 7: 'Stage 7'
+    }};
+
+    cytoscape.use(cytoscapeDagre);
+
+    const cyNodes = RESOLVE_DATA.nodes.map(n => ({{
+      data: {{ ...n, color: STAGE_COLORS[n.stage] || '#888' }}
+    }}));
+
+    const cyEdges = RESOLVE_DATA.edges.map(e => {{
+      const polys = e.poly_names;
+      const shortLabel = polys.length <= 2
+        ? polys.join(', ')
+        : polys.slice(0, 2).join(', ') + ' +' + (polys.length - 2);
+      return {{ data: {{ ...e, label: shortLabel }} }};
+    }});
+
+    const cy = cytoscape({{
+      container: document.getElementById('cy'),
+      elements: {{ nodes: cyNodes, edges: cyEdges }},
+      style: [
+        {{
+          selector: 'node',
+          style: {{
+            'background-color': 'data(color)',
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'padding': '10px',
+            'font-size': '10px',
+            'color': '#fff',
+            'text-wrap': 'wrap',
+            'text-max-width': '130px',
+            'shape': 'round-rectangle',
+            'border-width': 0,
+          }}
+        }},
+        {{
+          selector: 'node[?is_pcs]',
+          style: {{
+            'shape': 'ellipse',
+            'font-weight': 'bold',
+            'font-size': '12px',
+            'padding': '18px',
+          }}
+        }},
+        {{
+          selector: 'edge',
+          style: {{
+            'width': 2,
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'line-color': function(ele) {{
+              return ele.data('kind') === 'cp' ? '#3fb950' : '#d29922';
+            }},
+            'target-arrow-color': function(ele) {{
+              return ele.data('kind') === 'cp' ? '#3fb950' : '#d29922';
+            }},
+            'label': 'data(label)',
+            'font-size': '8px',
+            'color': '#8b949e',
+            'text-rotation': 'autorotate',
+            'text-background-color': '#161b22',
+            'text-background-opacity': 0.85,
+            'text-background-padding': '2px',
+            'text-margin-y': -8,
+          }}
+        }},
+        {{
+          selector: '.highlighted',
+          style: {{
+            'border-width': 3,
+            'border-color': '#58a6ff',
+            'line-color': '#58a6ff',
+            'target-arrow-color': '#58a6ff',
+            'opacity': 1,
+          }}
+        }},
+        {{
+          selector: '.dimmed',
+          style: {{ 'opacity': 0.15 }}
+        }},
+      ],
+      layout: {{
+        name: 'dagre',
+        rankDir: 'LR',
+        nodeSep: 40,
+        rankSep: 110,
+        edgeSep: 8,
+        fit: true,
+        padding: 30,
+        ranker: 'longest-path',
+      }}
+    }});
+
+    const panel = document.getElementById('info-panel');
+
+    function defaultPanel() {{
+      panel.innerHTML = '<h3>Claim Flow DAG</h3><p class="hint">Click a node or edge to explore claim flows between sumchecks.</p>';
+    }}
+
+    function showNodeInfo(node) {{
+      const d = node.data();
+      const color = d.color;
+      const incoming = node.incomers('edge');
+      const outgoing = node.outgoers('edge');
+
+      let html = `<h3>${{d.label}}</h3>
+        <span class="stage-badge" style="background:${{color}}22;color:${{color}};border:1px solid ${{color}}44">
+          ${{STAGE_LABELS[d.stage] || ''}}
+        </span>
+        <div class="hint" style="margin-top:.4rem">${{d.stage_title}}</div>`;
+
+      if (incoming.length) {{
+        html += `<div class="info-section"><div class="info-label">Consumes (${{incoming.length}} flow${{incoming.length>1?'s':''}})</div>`;
+        incoming.forEach(e => {{
+          e.data('poly_names').forEach(p => {{
+            html += `<div class="info-poly ${{e.data('kind')}}">${{e.data('kind')}}:${{p}}</div>`;
+          }});
+        }});
+        html += '</div>';
+      }}
+
+      if (outgoing.length) {{
+        html += `<div class="info-section"><div class="info-label">Produces (${{outgoing.length}} flow${{outgoing.length>1?'s':''}})</div>`;
+        outgoing.forEach(e => {{
+          const tgt = e.target().id() === 'PCS' ? ' → PCS' : '';
+          e.data('poly_names').forEach(p => {{
+            html += `<div class="info-poly ${{e.data('kind')}}">${{e.data('kind')}}:${{p}}${{tgt}}</div>`;
+          }});
+        }});
+        html += '</div>';
+      }}
+
+      panel.innerHTML = html;
+    }}
+
+    function showEdgeInfo(edge) {{
+      const d = edge.data();
+      const src = edge.source().data();
+      const tgt = edge.target().data();
+      const kindLabel = d.kind === 'cp' ? 'Committed → PCS' : 'Virtual poly claim';
+      const color = d.kind === 'cp' ? '#3fb950' : '#d29922';
+
+      panel.innerHTML = `
+        <h3 style="color:${{color}}">${{kindLabel}}</h3>
+        <div class="info-section">
+          <div class="info-label">From</div>
+          <div>${{src.label}}</div>
+        </div>
+        <div class="info-section">
+          <div class="info-label">To</div>
+          <div>${{tgt.label}}</div>
+        </div>
+        <div class="info-section">
+          <div class="info-label">Polynomials (${{d.poly_names.length}})</div>
+          ${{d.poly_names.map(p => `<div class="info-poly ${{d.kind}}">${{d.kind}}:${{p}}</div>`).join('')}}
+        </div>`;
+    }}
+
+    cy.on('tap', 'node', evt => {{
+      const node = evt.target;
+      const neighborhood = node.closedNeighborhood();
+      cy.elements().addClass('dimmed');
+      neighborhood.removeClass('dimmed').addClass('highlighted');
+      node.removeClass('dimmed');
+      showNodeInfo(node);
+    }});
+
+    cy.on('tap', 'edge', evt => {{
+      const edge = evt.target;
+      cy.elements().addClass('dimmed');
+      edge.removeClass('dimmed').addClass('highlighted');
+      edge.connectedNodes().removeClass('dimmed').addClass('highlighted');
+      showEdgeInfo(edge);
+    }});
+
+    cy.on('tap', evt => {{
+      if (evt.target === cy) {{
+        cy.elements().removeClass('dimmed highlighted');
+        defaultPanel();
+      }}
+    }});
+
+    document.getElementById('btn-fit').addEventListener('click', () => cy.fit(30));
+    document.getElementById('btn-reset').addEventListener('click', () => {{
+      cy.elements().removeClass('dimmed highlighted');
+      cy.fit(30);
+      defaultPanel();
+    }});
+  </script>"""
+
+    return _page("Resolve — Claim Flow DAG", body, "resolve").replace(
+        f"<style>{_CSS}</style>",
+        f"<style>{_CSS}{extra_css}</style>",
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════
 # Public API
 # ═══════════════════════════════════════════════════════════════════
 
-def generate_html(out_dir: str | Path = "site/stages", stages: dict | None = None) -> None:
+def generate_html(out_dir: str | Path = "docs", stages: dict | None = None) -> None:
     """Generate the HTML site.
 
     Args:
@@ -663,6 +990,10 @@ def generate_html(out_dir: str | Path = "site/stages", stages: dict | None = Non
     # Polynomial registry page
     (out / "polynomials.html").write_text(_polynomials_page())
     print(f"  wrote {out / 'polynomials.html'}")
+
+    # Resolve DAG page
+    (out / "resolve.html").write_text(_resolve_page())
+    print(f"  wrote {out / 'resolve.html'}")
 
 
 def _default_stages() -> dict[int, tuple[str, list]]:

@@ -7,7 +7,7 @@ Usage:
     python3 -m sumcheck registry        # polynomial registry
     python3 -m sumcheck registry --vp   # just virtual polys
     python3 -m sumcheck resolve         # polynomial resolution tracker
-    python3 -m sumcheck html            # generate HTML site → site/stages/
+    python3 -m sumcheck html            # generate HTML site → docs/
     python3 -m sumcheck html --stage 5  # just stage 5
     python3 -m sumcheck latex           # generate LaTeX → sumcheck_specs.tex
     python3 -m sumcheck latex --stage 3 # just stage 3
@@ -132,7 +132,7 @@ elif cmd == "html":
     all_stages = _default_stages()
     if selected:
         all_stages = {s: all_stages[s] for s in selected if s in all_stages}
-    out_dir = opts.get("out", "site/stages")
+    out_dir = opts.get("out", "docs")
     generate_html(out_dir=out_dir, stages=all_stages)
 
 elif cmd == "latex":
