@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Openings Overview</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ],
+      throwOnError: false
+    });"></script>
+  <style>
+:root {
+  --bg: #0d1117;
+  --card-bg: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --orange: #d29922;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+nav a:hover, nav a.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+.sumcheck-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.sumcheck-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+.metadata {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.meta-item {
+  font-size: 0.9rem;
+}
+.meta-label {
+  color: var(--text-muted);
+  margin-right: 0.3rem;
+}
+.meta-label::after { content: ":"; }
+.sum-over {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(88, 166, 255, 0.05);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+.spec-section { margin-top: 1rem; }
+.spec-section h4 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.math-block {
+  overflow-x: auto;
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.table-wrap { overflow-x: auto; }
+.constraint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.constraint-table th, .constraint-table td {
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+.constraint-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.constraint-table .idx { text-align: right; color: var(--text-muted); }
+.constraint-table .label { font-family: monospace; font-size: 0.8rem; }
+.constraint-table .math-cell { font-size: 0.85rem; }
+.openings { list-style: none; padding-left: 0; }
+.openings li {
+  padding: 0.2rem 0;
+  font-size: 0.9rem;
+}
+.openings li::before {
+  content: "\2192 ";
+  color: var(--text-muted);
+}
+
+    .openings-list { display: flex; flex-direction: column; gap: 0.3rem; }
+    .opening-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .opening-row:last-child { border-bottom: none; }
+    .opening-source {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+      min-width: 20ch;
+      font-family: monospace;
+    }
+    .opening-source:hover { text-decoration: underline; }
+    .opening-arrow { color: var(--text-muted); }
+    .opening-poly { font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="stage1.html">Stage 1</a>
+    <a href="stage2.html">Stage 2</a>
+    <a href="stage3.html">Stage 3</a>
+    <a href="stage4.html">Stage 4</a>
+    <a href="stage5.html">Stage 5</a>
+    <a href="stage6.html">Stage 6</a>
+    <a href="stage7.html">Stage 7</a>
+    <a href="openings.html" class="active">Openings</a>
+    <a href="polynomials.html">Polynomials</a>
+  </nav>
+  <h1>Openings Overview</h1>
+  
+    <section class="sumcheck-card">
+      <h3>Stage 1 — Spartan</h3>
+      <div class="openings-list">
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LeftInstructionInput}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RightInstructionInput}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Product}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{WriteLookupOutputToRD}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{WritePCtoRD}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{ShouldBranch}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{PC}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{UnexpandedPC}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Imm}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamAddress}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs1Value}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs2Value}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RdWriteValue}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamReadValue}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamWriteValue}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LeftLookupOperand}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RightLookupOperand}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{NextUnexpandedPC}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{NextPC}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{NextIsVirtual}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{NextIsFirstInSequence}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LookupOutput}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{ShouldJump}}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{AddOperands})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{SubtractOperands})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{MultiplyOperands})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{Load})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{Store})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{Jump})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{WriteLookupOutputToRD})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{VirtualInstruction})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{Assert})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{DoNotUpdateUnexpandedPC})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{Advice})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{IsCompressed})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{IsFirstInSequence})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage1.html#SpartanOuter (Stage 1)" class="opening-source">SpartanOuter (Stage 1)</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{IsLastInSequence})}(r_{\text{cycle}}^{(1)})$</span>
+        </div>
+</div></section>
+
+    <section class="sumcheck-card">
+      <h3>Stage 2 — Virtualization &amp; RAM</h3>
+      <div class="openings-list">
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LeftInstructionInput}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RightInstructionInput}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{IsRdNotZero})}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{WriteLookupOutputToRD})}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{Jump})}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LookupOutput}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{Branch})}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{NextIsNoop}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#SpartanProductVirtualization" class="opening-source">SpartanProductVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{VirtualInstruction})}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#RamReadWriteChecking" class="opening-source">RamReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamVal}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#RamReadWriteChecking" class="opening-source">RamReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamRa}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#RamReadWriteChecking" class="opening-source">RamReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{RamInc}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#InstructionClaimReduction" class="opening-source">InstructionClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LookupOutput}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#InstructionClaimReduction" class="opening-source">InstructionClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LeftLookupOperand}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#InstructionClaimReduction" class="opening-source">InstructionClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RightLookupOperand}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#InstructionClaimReduction" class="opening-source">InstructionClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{LeftInstructionInput}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#InstructionClaimReduction" class="opening-source">InstructionClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RightInstructionInput}}(r_{\text{cycle}}^{(2)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#RamRafEvaluation" class="opening-source">RamRafEvaluation</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamRa}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(1)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage2.html#RamOutputCheck" class="opening-source">RamOutputCheck</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamValFinal}}(r_{K_{\text{ram}}}^{(2)})$</span>
+        </div>
+</div></section>
+
+    <section class="sumcheck-card">
+      <h3>Stage 3 — Shift &amp; Instruction Input</h3>
+      <div class="openings-list">
+
+        <div class="opening-row">
+          <a href="stage3.html#Shift" class="opening-source">Shift</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{UnexpandedPC}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#Shift" class="opening-source">Shift</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{PC}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#Shift" class="opening-source">Shift</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{VirtualInstruction})}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#Shift" class="opening-source">Shift</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{OpFlags}(\text{IsFirstInSequence})}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#Shift" class="opening-source">Shift</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{IsNoop})}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{LeftOperandIsRs1Value})}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs1Value}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{LeftOperandIsPC})}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{UnexpandedPC}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{RightOperandIsRs2Value})}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs2Value}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionFlags}(\text{RightOperandIsImm})}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#InstructionInput" class="opening-source">InstructionInput</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Imm}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#RegistersClaimReduction" class="opening-source">RegistersClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RdWriteValue}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#RegistersClaimReduction" class="opening-source">RegistersClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs1Value}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage3.html#RegistersClaimReduction" class="opening-source">RegistersClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs2Value}}(r_{\text{cycle}}^{(3)})$</span>
+        </div>
+</div></section>
+
+    <section class="sumcheck-card">
+      <h3>Stage 4 — Registers &amp; RAM Val</h3>
+      <div class="openings-list">
+
+        <div class="opening-row">
+          <a href="stage4.html#RegistersReadWriteChecking" class="opening-source">RegistersReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RegistersVal}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage4.html#RegistersReadWriteChecking" class="opening-source">RegistersReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs1Ra}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage4.html#RegistersReadWriteChecking" class="opening-source">RegistersReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{Rs2Ra}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage4.html#RegistersReadWriteChecking" class="opening-source">RegistersReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RdWa}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage4.html#RegistersReadWriteChecking" class="opening-source">RegistersReadWriteChecking</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{RdInc}}(r_{\text{cycle}}^{(4)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage4.html#RamValCheck" class="opening-source">RamValCheck</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{RamInc}}(r_{\text{cycle}}^{(4)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage4.html#RamValCheck" class="opening-source">RamValCheck</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamRa}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(4)})$</span>
+        </div>
+</div></section>
+
+    <section class="sumcheck-card">
+      <h3>Stage 5 — Instruction Read RAF &amp; Reductions</h3>
+      <div class="openings-list">
+
+        <div class="opening-row">
+          <a href="stage5.html#InstructionReadRaf" class="opening-source">InstructionReadRaf</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textsf{InstructionRa}(i)(r_{K_{\text{instr}}^{(i)}}^{(5)}, r_{\text{cycle}}^{(5)}) \text{ for } i=0,\ldots,d_v-1$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage5.html#InstructionReadRaf" class="opening-source">InstructionReadRaf</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textsf{TableFlag}(j)(r_{\text{cycle}}^{(5)}) \text{ for } j=0,\ldots,N_{\text{tables}}-1$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage5.html#InstructionReadRaf" class="opening-source">InstructionReadRaf</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{InstructionRafFlag}}(r_{\text{cycle}}^{(5)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage5.html#RamRaClaimReduction" class="opening-source">RamRaClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamRa}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(5)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage5.html#RegistersValEvaluation" class="opening-source">RegistersValEvaluation</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{RdInc}}(r_{\text{cycle}}^{(5)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage5.html#RegistersValEvaluation" class="opening-source">RegistersValEvaluation</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RdWa}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(5)})$</span>
+        </div>
+</div></section>
+
+    <section class="sumcheck-card">
+      <h3>Stage 6 — Booleanity, Bytecode &amp; Virtualization</h3>
+      <div class="openings-list">
+
+        <div class="opening-row">
+          <a href="stage6.html#RamHammingBooleanity" class="opening-source">RamHammingBooleanity</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{BurntOrange}{\textsf{RamHammingWeight}}(r_{\text{cycle}}^{(6)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage6.html#IncClaimReduction" class="opening-source">IncClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{RamInc}}(r_{\text{cycle}}^{(6)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage6.html#IncClaimReduction" class="opening-source">IncClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{RdInc}}(r_{\text{cycle}}^{(6)})$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage6.html#BytecodeReadRaf" class="opening-source">BytecodeReadRaf</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{BytecodeRa}(i)}(r_{K_{\text{bc}}^{(i)}}^{(6)}, r_{\text{cycle}}^{(6)}) \text{ for } i=0,\ldots,d_{\text{bc}}-1$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage6.html#InstructionRaVirtualization" class="opening-source">InstructionRaVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textsf{InstructionRa}(j)(r_{K^{(j)}}^{(5)}, r_{\text{cycle}}^{(6)}) \text{ for } j=0,\ldots,d_{\text{instr}}-1$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage6.html#RamRaVirtualization" class="opening-source">RamRaVirtualization</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textcolor{ForestGreen}{\textsf{RamRa}(i)}(r_{K_{\text{ram}}^{(i)}}^{(2)}, r_{\text{cycle}}^{(6)}) \text{ for } i=0,\ldots,d_{\text{ram}}-1$</span>
+        </div>
+
+        <div class="opening-row">
+          <a href="stage6.html#Booleanity" class="opening-source">Booleanity</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textsf{Ra}_{j}(r_{\text{addr}}^{(6)}, r_{\text{cycle}}^{(6)}) \text{ for } j=0,\ldots,d-1 (d = d_{\text{instr}} + d_{\text{bc}} + d_{\text{ram}})$</span>
+        </div>
+</div></section>
+
+    <section class="sumcheck-card">
+      <h3>Stage 7 — Hamming Weight Claim Reduction</h3>
+      <div class="openings-list">
+
+        <div class="opening-row">
+          <a href="stage7.html#HammingWeightClaimReduction" class="opening-source">HammingWeightClaimReduction</a>
+          <span class="opening-arrow">→</span>
+          <span class="opening-poly">$\textsf{Ra}_{j}(r_{\text{addr}}^{(7)}, r_{\text{cycle}}^{(6)}) \text{ for } j=0,\ldots,N_{\text{ra}}-1 (N_{\text{ra}} = d_{\text{instr}} + d_{\text{bc}} + d_{\text{ram}})$</span>
+        </div>
+</div></section>
+</body>
+</html>

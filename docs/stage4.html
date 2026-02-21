@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 4 — Registers &amp; RAM Val</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ],
+      throwOnError: false
+    });"></script>
+  <style>
+:root {
+  --bg: #0d1117;
+  --card-bg: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --orange: #d29922;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+nav a:hover, nav a.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+.sumcheck-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.sumcheck-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+.metadata {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.meta-item {
+  font-size: 0.9rem;
+}
+.meta-label {
+  color: var(--text-muted);
+  margin-right: 0.3rem;
+}
+.meta-label::after { content: ":"; }
+.sum-over {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(88, 166, 255, 0.05);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+.spec-section { margin-top: 1rem; }
+.spec-section h4 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.math-block {
+  overflow-x: auto;
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.table-wrap { overflow-x: auto; }
+.constraint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.constraint-table th, .constraint-table td {
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+.constraint-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.constraint-table .idx { text-align: right; color: var(--text-muted); }
+.constraint-table .label { font-family: monospace; font-size: 0.8rem; }
+.constraint-table .math-cell { font-size: 0.85rem; }
+.openings { list-style: none; padding-left: 0; }
+.openings li {
+  padding: 0.2rem 0;
+  font-size: 0.9rem;
+}
+.openings li::before {
+  content: "\2192 ";
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="stage1.html">Stage 1</a>
+    <a href="stage2.html">Stage 2</a>
+    <a href="stage3.html">Stage 3</a>
+    <a href="stage4.html" class="active">Stage 4</a>
+    <a href="stage5.html">Stage 5</a>
+    <a href="stage6.html">Stage 6</a>
+    <a href="stage7.html">Stage 7</a>
+    <a href="openings.html">Openings</a>
+    <a href="polynomials.html">Polynomials</a>
+  </nav>
+  <h1>Stage 4 — Registers &amp; RAM Val</h1>
+  
+    <section class="sumcheck-card" id="RegistersReadWriteChecking">
+      <h3>RegistersReadWriteChecking</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> 3</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 K_{\text{reg}} + \log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_k \in \{0,1\}^{\log_2 K_{\text{reg}}}, X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$\textcolor{BurntOrange}{\textsf{RdWriteValue}}(r_{\text{cycle}}^{(3)}) + \gamma \cdot \textcolor{BurntOrange}{\textsf{Rs1Value}}(r_{\text{cycle}}^{(3)}) + \gamma^{2} \cdot \textcolor{BurntOrange}{\textsf{Rs2Value}}(r_{\text{cycle}}^{(3)})$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\widetilde{\text{eq}}(r_{\text{cycle}}^{(3)}, X_t) \cdot \left(\textcolor{BurntOrange}{\textsf{RdWa}}(X_k, X_t) \cdot \left(\textcolor{ForestGreen}{\textsf{RdInc}}(X_t) + \textcolor{BurntOrange}{\textsf{RegistersVal}}(X_k, X_t)\right) + \gamma \cdot \textcolor{BurntOrange}{\textsf{Rs1Ra}}(X_k, X_t) \cdot \textcolor{BurntOrange}{\textsf{RegistersVal}}(X_k, X_t) + \gamma^{2} \cdot \textcolor{BurntOrange}{\textsf{Rs2Ra}}(X_k, X_t) \cdot \textcolor{BurntOrange}{\textsf{RegistersVal}}(X_k, X_t)\right)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textcolor{BurntOrange}{\textsf{RegistersVal}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</li>
+<li>$\textcolor{BurntOrange}{\textsf{Rs1Ra}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</li>
+<li>$\textcolor{BurntOrange}{\textsf{Rs2Ra}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</li>
+<li>$\textcolor{BurntOrange}{\textsf{RdWa}}(r_{K_{\text{reg}}}^{(4)}, r_{\text{cycle}}^{(4)})$</li>
+<li>$\textcolor{ForestGreen}{\textsf{RdInc}}(r_{\text{cycle}}^{(4)})$</li></ul>
+    </div>
+    </section>
+
+    <section class="sumcheck-card" id="RamValCheck">
+      <h3>RamValCheck</h3>
+      <div class="metadata">
+        <div class="meta-item"><span class="meta-label">Degree</span> 3</div>
+        <div class="meta-item"><span class="meta-label">Rounds</span> $\log_2 T$</div>
+      </div>
+      <div class="sum-over">
+        $\displaystyle\sum$ over: $X_t \in \{0,1\}^{\log_2 T}$
+      </div>
+      <div class="meta-item"><span class="meta-label">Opening point</span> $(r_{\text{cycle}}^{(4)})$</div>
+      <div class="spec-section">
+        <h4>RHS (input claim)</h4>
+        <div class="math-block">$$\textcolor{BurntOrange}{\textsf{RamVal}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(2)}) - \textcolor{BurntOrange}{\textsf{RamValInit}}(r_{K_{\text{ram}}}^{(2)}) + \gamma \cdot \left(\textcolor{BurntOrange}{\textsf{RamValFinal}}(r_{K_{\text{ram}}}^{(2)}) - \textcolor{BurntOrange}{\textsf{RamValInit}}(r_{K_{\text{ram}}}^{(2)})\right)$$</div>
+      </div>
+      <div class="spec-section">
+        <h4>Integrand</h4>
+        <div class="math-block">$$\textcolor{ForestGreen}{\textsf{RamInc}}(X_t) \cdot \textcolor{BurntOrange}{\textsf{RamRa}}(r_{K_{\text{ram}}}^{(2)}, X_t) \cdot \left(\widetilde{\textsf{LT}}(X_t, r_{\text{cycle}}^{(2)}) + \gamma\right)$$</div>
+      </div>
+      
+    <div class="spec-section">
+      <h4>Openings produced</h4>
+      <ul class="openings"><li>$\textcolor{ForestGreen}{\textsf{RamInc}}(r_{\text{cycle}}^{(4)})$</li>
+<li>$\textcolor{BurntOrange}{\textsf{RamRa}}(r_{K_{\text{ram}}}^{(2)}, r_{\text{cycle}}^{(4)})$</li></ul>
+    </div>
+    </section>
+</body>
+</html>
